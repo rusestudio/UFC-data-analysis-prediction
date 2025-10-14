@@ -75,27 +75,62 @@ for link in match_links:  # fixed: iterate actual links
                     method = method_tag.get_text(strip=True) if method_tag else "-"
 
                 # extract data from table
-                table_stats = soup.find("table", class_="b-fight-details__table js-fight-table")
+                table_stats = soup.find_all("table", class_="b-fight-details__table js-fight-table")
+                #print(len(table_stats)) #2
+                table1= table_stats[0] #top totals table
+                table2= table_stats[1] #significant table body attack
+
                 if table_stats:
                     # get each round num ex: Round 1, Round 2, Round 3
-                    round_headers = [th.get_text(strip=True) for th in table_stats.find_all("th", colspan="10")]
+                    #table1 = [th.get_text(strip=True) for th in table_stats.find_all("th", colspan="10")]
+                    #current_round = None
+                    for section in table1.find_all("thead", class_="b-fight-details__table-row b-fight-details__table-row_type_head"):
+                            # check if this row is a round header
+                            header_th = section.find("th")
+                            if header_th:
+                                if header_th:
+                                    current_round = header_th.get_text(strip=True)  # e.g., "Round 1"
 
-                    # iterate over each fight row
-                    for r in table_stats.find_all("tr", class_="b-fight-details__table-row"):
-                        td_stats = r.find_all("td")
-                        if len(td_stats) >= 10:  # total col is 10
-                            # get data in each row ex: round 1
-                            kd = [p.get_text(strip=True) for p in td_stats[1].find_all("p")]
-                            sig_str = [p.get_text(strip=True) for p in td_stats[2].find_all("p")]
-                            sig_str_pct = [p.get_text(strip=True) for p in td_stats[3].find_all("p")]
-                            total_str = [p.get_text(strip=True) for p in td_stats[4].find_all("p")]
-                            td_attempt = [p.get_text(strip=True) for p in td_stats[5].find_all("p")]
-                            td_pct = [p.get_text(strip=True) for p in td_stats[6].find_all("p")]
-                            sub_att = [p.get_text(strip=True) for p in td_stats[7].find_all("p")]
-                            rev = [p.get_text(strip=True) for p in td_stats[8].find_all("p")]
-                            ctrl_sec = [p.get_text(strip=True) for p in td_stats[9].find_all("p")]
+                            # iterate over each fight row
+                            for r in table1.find_all("tr", class_="b-fight-details__table-row"):
+                                td_stats = r.find_all("td")
+                                if len(td_stats) >= 10:  # total col is 10
+                                    # get data in each row ex: round 1
+                                    kd = [p.get_text(strip=True) for p in td_stats[1].find_all("p")]
+                                    sig_str = [p.get_text(strip=True) for p in td_stats[2].find_all("p")]
+                                    sig_str_pct = [p.get_text(strip=True) for p in td_stats[3].find_all("p")]
+                                    total_str = [p.get_text(strip=True) for p in td_stats[4].find_all("p")]
+                                    td_attempt = [p.get_text(strip=True) for p in td_stats[5].find_all("p")]
+                                    td_pct = [p.get_text(strip=True) for p in td_stats[6].find_all("p")]
+                                    sub_att = [p.get_text(strip=True) for p in td_stats[7].find_all("p")]
+                                    rev = [p.get_text(strip=True) for p in td_stats[8].find_all("p")]
+                                    ctrl_sec = [p.get_text(strip=True) for p in td_stats[9].find_all("p")]
 
-                            # each list above has [fighter1, fighter2]
-                            print("KD:", kd, "Sig.Str:", sig_str, "Control:", ctrl_sec)
+                                    # each list above has [fighter1, fighter2]
+                                    print("round:", current_round,"KD:", kd, "Sig.Str:", sig_str, "Control:", ctrl_sec)
+                       # iterate over all rows in table
+                        # get each round num ex: Round 1, Round 2, Round 3                 
+                    #current_round_2 = None
+                    for section in table2.find_all("thead", class_="b-fight-details__table-row b-fight-details__table-row_type_head"):
+                            # check if this row is a round header
+                            header_th = section.find("th")
+                            if header_th:
+                                current_round_2 = header_th.get_text(strip=True)  # e.g., "Round 1"
 
+                            #tbody = section.find_next("tbody") #avoid double loop from header
+                            #if not tbody:
+                                #continue
 
+                            for rr in table2.find_all("tr", class_="b-fight-details__table-row"):
+                                td_stats_2 = rr.find_all("td")                    
+                                if len(td_stats_2) >= 8:
+                                    #get body attack data
+                                    head = [p.get_text(strip=True) for p in td_stats_2[3].find_all("p")]
+                                    body = [p.get_text(strip=True) for p in td_stats_2[4].find_all("p")]
+                                    leg = [p.get_text(strip=True) for p in td_stats_2[5].find_all("p")]
+                                    distance = [p.get_text(strip=True) for p in td_stats_2[6].find_all("p")]
+                                    clinch = [p.get_text(strip=True) for p in td_stats_2[7].find_all("p")]
+                                    ground = [p.get_text(strip=True) for p in td_stats_2[8].find_all("p")]
+
+                                    # each list above has [fighter1, fighter2]
+                                    print("round:", current_round_2,"head:", head, "body:", body, "leg:", leg)
