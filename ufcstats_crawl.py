@@ -54,11 +54,15 @@ for link in match_links:  # fixed: iterate actual links
             #get total round in 8 row
             total_round = tds[8].find("p").get_text(strip=True)
 
-            #get only matching category
-            if weight_class == "Lightweight" and (method in ["KO/TKO", "KO", "TKO"]):
-                print("match found")
-                print("Weight:", weight_class)
-                print("Method:", method)
-                print("Round:", total_round)
+               #get only matching category
+            category = weight_class == "Lightweight" and (method in ["KO/TKO", "KO", "TKO"])
+            if category:
+                #print("match found",weight_class, method)
+                #get data link to go to the stats table and extract data 
+                data_link = row.get("data-link") #fight link that matched the category
+
+                #req again with the fight link to go to stats table
+                data_link_response = requests.get(data_link)
+                soup = BeautifulSoup(data_link_response.text, "html.parser")
 
 
