@@ -65,4 +65,37 @@ for link in match_links:  # fixed: iterate actual links
                 data_link_response = requests.get(data_link)
                 soup = BeautifulSoup(data_link_response.text, "html.parser")
 
+                   # extract data in stats table page
+                fight_details = soup.find("div", class_="b-fight-details__fight")
+                if fight_details:
+                    # get round num
+                    total_round = fight_details.find("i", string=re.compile("Round:")).find_next(text=True).strip()
+                    # get method
+                    method_tag = fight_details.find("i", attrs={"style": "font-style: normal"})
+                    method = method_tag.get_text(strip=True) if method_tag else "-"
+
+                # extract data from table
+                table_stats = soup.find("table", class_="b-fight-details__table js-fight-table")
+                if table_stats:
+                    # get each round num ex: Round 1, Round 2, Round 3
+                    round_headers = [th.get_text(strip=True) for th in table_stats.find_all("th", colspan="10")]
+
+                    # iterate over each fight row
+                    for r in table_stats.find_all("tr", class_="b-fight-details__table-row"):
+                        td_stats = r.find_all("td")
+                        if len(td_stats) >= 10:  # total col is 10
+                            # get data in each row ex: round 1
+                            kd = [p.get_text(strip=True) for p in td_stats[1].find_all("p")]
+                            sig_str = [p.get_text(strip=True) for p in td_stats[2].find_all("p")]
+                            sig_str_pct = [p.get_text(strip=True) for p in td_stats[3].find_all("p")]
+                            total_str = [p.get_text(strip=True) for p in td_stats[4].find_all("p")]
+                            td_attempt = [p.get_text(strip=True) for p in td_stats[5].find_all("p")]
+                            td_pct = [p.get_text(strip=True) for p in td_stats[6].find_all("p")]
+                            sub_att = [p.get_text(strip=True) for p in td_stats[7].find_all("p")]
+                            rev = [p.get_text(strip=True) for p in td_stats[8].find_all("p")]
+                            ctrl_sec = [p.get_text(strip=True) for p in td_stats[9].find_all("p")]
+
+                            # each list above has [fighter1, fighter2]
+                            print("KD:", kd, "Sig.Str:", sig_str, "Control:", ctrl_sec)
+
 
