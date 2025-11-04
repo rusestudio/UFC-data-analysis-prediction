@@ -148,3 +148,49 @@ def extract_fight_data(stats_links):
             fight_data[all_stats].append(round_data)
         time.sleep(0.5)
     return fight_data
+
+def save_to_csv(fight_data):
+    fights_by_round_count = defaultdict(list)
+    columns = [
+        "fight",
+        "round",
+        "kd",
+        "sig_str",
+        "sig_str_pct",
+        "total_str",
+        "td_attempt",
+        "td_pct",
+        "sub_att",
+        "rev",
+        "ctrl_sec",
+        "head",
+        "body",
+        "leg",
+        "distance",
+        "clinch",
+        "ground",
+        "total_round",
+        "method",
+    ]
+
+    fight_counter = 1
+    for link, rounds in fight_data.items():
+        total_round_c = rounds[0]["total_round"]
+        fight_name = f"fight{fight_counter}"
+        for r in rounds:
+            row = {"fight": fight_name, "round": r["round"]}
+            for k, v in r.items():
+                if k not in ["link", "round", "total_round"]:
+                    row[k] = v
+            fights_by_round_count[total_round_c].append(row)
+        fight_counter += 1
+
+    for total_round_c, rows in fights_by_round_count.items():
+        if total_round_c in ["4", "5"]: #only 123 round
+            continue
+        filename = f"ufc_totalround_{total_round_c}.csv"
+        with open(filename, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=columns)
+            writer.writeheader()
+            writer.writerows(rows)
+        print(f" {filename} ({len(rows)} rows)")
