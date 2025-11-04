@@ -11,23 +11,26 @@ from tqdm import tqdm
 def split_of_list(lst):
     clean = []
     for val in lst:
-        match = re.findall(r"(\d+)\s*of\s*(\d+)", val) #remove of
+        match = re.findall(r"(\d+)\s*of\s*(\d+)", val)  # remove of
         if match:
             clean.append([int(match[0][0]), int(match[0][1])])
         else:
             clean.append([0, 0])
-    return clean  
+    return clean
 
 
 def clean_pct_list(lst):
     return [
         float(re.sub(r"[^0-9.]", "", v)) if re.search(r"\d", v) else 0.0 for v in lst
-    ] #% to float
+    ]  # % to float
 
 
 def clean_int_list(lst):
     return [int(re.sub(r"\D", "", v)) if re.search(r"\d", v) else 0 for v in lst]
-#to int
+
+
+# to int
+
 
 def ctrl_to_seconds(lst):
     result = []
@@ -35,12 +38,13 @@ def ctrl_to_seconds(lst):
         match = re.findall(r"(\d+):(\d+)", v)
         if match:
             m, s = map(int, match[0])
-            result.append(m * 60 + s) #min to sec
+            result.append(m * 60 + s)  # min to sec
         else:
             result.append(0)
-    return result  
+    return result
 
-#req url
+
+# req url
 BASE_URL = "http://ufcstats.com"
 MATCH_URL = f"{BASE_URL}/statistics/events/completed?page="
 
@@ -66,6 +70,7 @@ def get_match_links(pages=18, stop_date="January 03, 2015"):
                 match_links.append(link_tag["href"])
     return match_links
 
+
 def filter_fight_links(match_links):
     stats_link = []
 
@@ -89,6 +94,7 @@ def filter_fight_links(match_links):
     print(f"{len(stats_link)} filtered fight")
     return stats_link
 
+
 def extract_fight_data(stats_links):
     fight_data = defaultdict(list)
 
@@ -100,7 +106,7 @@ def extract_fight_data(stats_links):
         if not fight_details:
             continue
 
-        #div data
+        # div data
         total_round = fight_details.find("i", class_="b-fight-details__text-item")
         total_round_c = (
             total_round.get_text(strip=True).replace("Round:", "").strip()
@@ -115,12 +121,12 @@ def extract_fight_data(stats_links):
         if len(tables) < 2:
             continue
 
-        t1_rows = [ #total tables
+        t1_rows = [  # total tables
             r
             for r in tables[0].find_all("tr", class_="b-fight-details__table-row")
             if len(r.find_all("td")) >= 10
         ]
-        t2_rows = [ #signf strike
+        t2_rows = [  # signf strike
             r
             for r in tables[1].find_all("tr", class_="b-fight-details__table-row")
             if len(r.find_all("td")) >= 9
@@ -183,6 +189,7 @@ def extract_fight_data(stats_links):
         time.sleep(0.5)
     return fight_data
 
+
 def save_to_csv(fight_data):
     fights_by_round_count = defaultdict(list)
     columns = [
@@ -220,7 +227,7 @@ def save_to_csv(fight_data):
         fight_counter += 1
 
     for total_round_c, rows in fights_by_round_count.items():
-        if total_round_c in ["4", "5"]: #only 123 round
+        if total_round_c in ["4", "5"]:  # only 123 round
             continue
         filename = f"ufc_totalround_{total_round_c}.csv"
         with open(filename, "w", newline="", encoding="utf-8") as f:
@@ -228,6 +235,7 @@ def save_to_csv(fight_data):
             writer.writeheader()
             writer.writerows(rows)
         print(f" {filename} ({len(rows)} rows)")
+
 
 def main():
     print("start crawl")
