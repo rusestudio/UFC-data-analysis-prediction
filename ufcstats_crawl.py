@@ -194,3 +194,15 @@ def save_to_csv(fight_data):
             writer.writeheader()
             writer.writerows(rows)
         print(f" {filename} ({len(rows)} rows)")
+
+def main():
+    print("start crawl")
+    match_links = get_match_links()
+    stats_links = filter_fight_links(match_links)
+    fight_data = extract_fight_data(stats_links)
+    save_to_csv(fight_data)
+    print("finish crawl")
+
+
+if __name__ == "__main__":
+    main()
