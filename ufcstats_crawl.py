@@ -54,3 +54,97 @@ def filter_fight_links(match_links):
 
     print(f"{len(stats_link)} filtered fight")
     return stats_link
+
+def extract_fight_data(stats_links):
+    fight_data = defaultdict(list)
+
+    for all_stats in tqdm(stats_links, desc="Extracting stats"):
+        response = requests.get(all_stats)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        fight_details = soup.find("div", class_="b-fight-details__fight")
+        if not fight_details:
+            continue
+
+        #div data
+        total_round = fight_details.find("i", class_="b-fight-details__text-item")
+        total_round_c = (
+            total_round.get_text(strip=True).replace("Round:", "").strip()
+            if total_round
+            else "-"
+        )
+        method_tag = fight_details.find("i", attrs={"style": "font-style: normal"})
+        method = method_tag.get_text(strip=True) if method_tag else "-"
+
+        # tables stats
+        tables = soup.find_all("table", class_="b-fight-details__table js-fight-table")
+        if len(tables) < 2:
+            continue
+
+        t1_rows = [ #total tables
+            r
+            for r in tables[0].find_all("tr", class_="b-fight-details__table-row")
+            if len(r.find_all("td")) >= 10
+        ]
+        t2_rows = [ #signf strike
+            r
+            for r in tables[1].find_all("tr", class_="b-fight-details__table-row")
+            if len(r.find_all("td")) >= 9
+        ]
+
+        for idx, section in enumerate(t1_rows, start=1):
+            td_stats = section.find_all("td")
+
+            def extract_col(col_idx):
+                return [p.get_text(strip=True) for p in td_stats[col_idx].find_all("p")]
+
+            kd = extract_col(1)
+            sig_str = extract_col(2)
+            sig_str_pct = extract_col(3)
+            total_str = extract_col(4)
+            td_attempt = extract_col(5)
+            td_pct = extract_col(6)
+            sub_att = extract_col(7)
+            rev = extract_col(8)
+            ctrl_sec = extract_col(9)
+
+            # match index for second table
+            if idx - 1 < len(t2_rows):
+                td_stats_2 = t2_rows[idx - 1].find_all("td")
+
+                def get_p(idx):
+                    return [
+                        p.get_text(strip=True) for p in td_stats_2[idx].find_all("p")
+                    ]
+
+                head, body, leg = get_p(3), get_p(4), get_p(5)
+                distance, clinch, ground = get_p(6), get_p(7), get_p(8)
+            else:
+                head = body = leg = distance = clinch = ground = ["-", "-"]
+
+            # re apply
+            round_data = {
+                "link": all_stats,
+                "round": idx,
+                "kd": clean_int_list(kd),
+                "sig_str": split_of_list(sig_str),
+                "sig_str_pct": clean_pct_list(sig_str_pct),
+                "total_str": split_of_list(total_str),
+                "td_attempt": split_of_list(td_attempt),
+                "td_pct": clean_pct_list(td_pct),
+                "sub_att": clean_int_list(sub_att),
+                "rev": clean_int_list(rev),
+                "ctrl_sec": ctrl_to_seconds(ctrl_sec),
+                "head": split_of_list(head),
+                "body": split_of_list(body),
+                "leg": split_of_list(leg),
+                "distance": split_of_list(distance),
+                "clinch": split_of_list(clinch),
+                "ground": split_of_list(ground),
+                "total_round": total_round_c,
+                "method": method,
+            }
+
+            fight_data[all_stats].append(round_data)
+        time.sleep(0.5)
+    return fight_data
