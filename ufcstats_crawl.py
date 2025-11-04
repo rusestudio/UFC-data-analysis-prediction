@@ -7,6 +7,40 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
+
+def split_of_list(lst):
+    clean = []
+    for val in lst:
+        match = re.findall(r"(\d+)\s*of\s*(\d+)", val) #remove of
+        if match:
+            clean.append([int(match[0][0]), int(match[0][1])])
+        else:
+            clean.append([0, 0])
+    return clean  
+
+
+def clean_pct_list(lst):
+    return [
+        float(re.sub(r"[^0-9.]", "", v)) if re.search(r"\d", v) else 0.0 for v in lst
+    ] #% to float
+
+
+def clean_int_list(lst):
+    return [int(re.sub(r"\D", "", v)) if re.search(r"\d", v) else 0 for v in lst]
+#to int
+
+def ctrl_to_seconds(lst):
+    result = []
+    for v in lst:
+        match = re.findall(r"(\d+):(\d+)", v)
+        if match:
+            m, s = map(int, match[0])
+            result.append(m * 60 + s) #min to sec
+        else:
+            result.append(0)
+    return result  
+
+#req url
 BASE_URL = "http://ufcstats.com"
 MATCH_URL = f"{BASE_URL}/statistics/events/completed?page="
 
