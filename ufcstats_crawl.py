@@ -165,7 +165,7 @@ def extract_fight_data(stats_links):
             # re apply
             round_data = {
                 "link": all_stats,
-                "round": idx,
+                "current_round": idx,
                 "kd": clean_int_list(kd),
                 "sig_str": split_of_list(sig_str),
                 "sig_str_pct": clean_pct_list(sig_str_pct),
@@ -183,6 +183,7 @@ def extract_fight_data(stats_links):
                 "ground": split_of_list(ground),
                 "total_round": total_round_c,
                 "method": method,
+                #19 data
             }
 
             fight_data[all_stats].append(round_data)
@@ -193,8 +194,8 @@ def extract_fight_data(stats_links):
 def save_to_csv(fight_data):
     fights_by_round_count = defaultdict(list)
     columns = [
-        "fight",
-        "round",
+        "fight_id",
+        "current_round",
         "kd",
         "sig_str",
         "sig_str_pct",
@@ -212,6 +213,7 @@ def save_to_csv(fight_data):
         "ground",
         "total_round",
         "method",
+        #19 data
     ]
 
     fight_counter = 1
@@ -219,9 +221,9 @@ def save_to_csv(fight_data):
         total_round_c = rounds[0]["total_round"]
         fight_name = f"fight{fight_counter}"
         for r in rounds:
-            row = {"fight": fight_name, "round": r["round"]}
+            row = {"fight_id": fight_name, "current_round": r["current_round"]}
             for k, v in r.items():
-                if k not in ["link", "round", "total_round"]:
+                if k not in ["link", "current_round", "total_round"]:
                     row[k] = v
             fights_by_round_count[total_round_c].append(row)
         fight_counter += 1
@@ -248,3 +250,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
