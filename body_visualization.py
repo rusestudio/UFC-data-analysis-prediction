@@ -20,10 +20,7 @@ leg_intensity  = norm(g_leg)
 
 
 def heat_color(intensity, base=(1,0,0)):
-    """
-    Blend between white → red based on intensity.
-    """
-    r = base[0] * intensity + 1*(1-intensity)
+    r = base[0] * intensity + 1*(1-intensity) #gradient
     g = base[1] * intensity + 1*(1-intensity)
     b = base[2] * intensity + 1*(1-intensity)
     return (r,g,b)
