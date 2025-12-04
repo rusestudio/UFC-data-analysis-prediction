@@ -10,10 +10,10 @@ UFC 경기 데이터에서 KO 승리 선수의 이전 라운드 타격 데이터
 '''
 def extracted_ko_data(ko_data: pd.DataFrame, non_ko_data: pd.DataFrame, ko_round: int) -> pd.DataFrame:
     '''
-    ko_winner_body_total
-    ko_winner_leg_total
-    ko_loser_body_total
-    ko_loser_leg_total
+    ko_winner_body_avg
+    ko_winner_leg_avg
+    ko_loser_body_avg
+    ko_loser_leg_avg
     '''
     # 필요 컬럼만 추출 + string 형태의 리스트를 실제 리스트로 변환
     extracted_ko_prev_data = ko_data[ko_data['round'] < ko_round][['fight', 'body', 'leg']].copy()
@@ -56,15 +56,16 @@ UFC 경기 데이터에서 KO 승리 선수와 Non_KO 승리 선수의 이전 �
 def process_and_save_data():
     ko_file_path = ["./ufc_totalround_2.csv",
                     "./ufc_totalround_3.csv"]
-    non_ko_file_path = "./ufc_notko_totalround_3.csv"
+    non_ko_file_path = ["./ufc_notko_totalround_2.csv",
+                        "./ufc_notko_totalround_3.csv"]
 
     ko_file_name = "ufc_extracted_ko_round_{}_data.csv"
-    non_ko_data = load_ufc_data(non_ko_file_path)
 
-    for path in ko_file_path:
-        data = load_ufc_data(path)
-        ko_round = int(path.split("_")[-1].split(".")[0])
-        extracted_data = extracted_ko_data(data, non_ko_data, ko_round)
+    for i in range(len(ko_file_path)):
+        non_ko_data = load_ufc_data(non_ko_file_path[i])
+        ko_data = load_ufc_data(ko_file_path[i])
+        ko_round = int(ko_file_path[i].split("_")[-1].split(".")[0])
+        extracted_data = extracted_ko_data(ko_data, non_ko_data, ko_round)
         extracted_data.to_csv(ko_file_name.format(ko_round), index=False)
 
 
