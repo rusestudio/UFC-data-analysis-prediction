@@ -226,7 +226,7 @@ outlier_counts = outlier_mask.sum().sort_values(ascending=False)
 print("변수별 이상치 개수")
 print(outlier_counts)
 # %%
-#다중공성성 확인
+#다중공선성 확인
 corr_matrix = df[union_cols].corr().abs()
 
 upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
@@ -267,4 +267,46 @@ plt.xticks(rotation=45, fontsize=10)
 plt.yticks(fontsize=10)
 plt.tight_layout()
 plt.show()
+# %%
+#최종 변수로 모델(randomforest)
+X = df_200[final_cols]
+y = df_200['ko여부']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=1,
+    stratify=y
+)
+#적은 데이터에서는 CV 사용이 더 낫기 때문에 valid X
+
+print("Train: ", X_train.shape)
+print("Test: ", X_test.shape)
+# %%
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.metrics import make_scorer
+rf_final = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=7,
+    min_samples_split=5,
+    min_samples_leaf=3,
+    random_state=1,
+    n_jobs=-1
+)
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
+
+f1_scorer = make_scorer(f1_score)
+
+cv_scores = cross_val_score(
+    rf_final,
+    X_train_valid,
+    y_train_valid,
+    cv=cv,
+    scoring=f1_scorer
+)
+
+print("각 Fold F1: ", cv_scores)
+print("평균 F1: ", round(cv_scores.mean(), 4))
+print("표준편차: ", round(cv_scores.std(), 4))
 # %%
