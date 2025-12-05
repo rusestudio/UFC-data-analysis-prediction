@@ -287,9 +287,9 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import make_scorer
 rf_final = RandomForestClassifier(
     n_estimators=200,
-    max_depth=7,
+    max_depth=4,
     min_samples_split=5,
-    min_samples_leaf=3,
+    min_samples_leaf=5,
     random_state=1,
     n_jobs=-1
 )
@@ -309,4 +309,73 @@ cv_scores = cross_val_score(
 print("각 Fold F1: ", cv_scores)
 print("평균 F1: ", round(cv_scores.mean(), 4))
 print("표준편차: ", round(cv_scores.std(), 4))
+# %%
+rf_final.fit(X_train, y_train)
+train_proba = rf_final.predict_proba(X_train)[:,1]
+
+for th in [0.3, 0.35, 0.4, 0.45, 0.5]:
+    preds = (train_proba >= th).astype(int)
+    print("th: ", th, "f1: ", f1_score(y_train, preds))
+# %%
+#과적합 체크
+y_train_pred = rf_final.predict(X_train)
+train_f1 = f1_score(y_train, y_train_pred)
+
+cv_mean = cv_scores.mean()
+gap = train_f1 - cv_mean
+
+if gap > 0.1:
+    print("과적합 가능성 큼")
+elif gap > 0.05:
+    print("약한 과적합")
+else:
+    print("과적합 심하지 않음")
+    
+print("Train F1: ", round(train_f1, 4))
+print("CV 평균 F1: ", round(cv_mean, 4))
+print("Train - CV 차이: ", round(gap, 4))
+# %%
+from sklearn.model_selection import cross_val_predict
+from sklearn.metrics import log_loss
+
+train_proba = rf_final.predict_proba(X_train)
+valid_proba = cross_val_predict(rf_final, X_train, y_train, cv=cv, method="predict_proba")
+
+train_loss = log_loss(y_train, train_proba)
+valid_loss = log_loss(y_train, valid_proba)
+
+print("Train loss: ", train_loss)
+print("CV loss: ", valid_loss)
+
+# %%
+from sklearn.model_selection import learning_curve
+
+train_sizes, train_scores, valid_scores = learning_curve(
+    rf_final,
+    X_train,
+    y_train,
+    cv=cv,
+    scoring="neg_log_loss",         
+    train_sizes=np.linspace(0.2, 1.0, 7),
+    shuffle=True,
+    random_state=1
+)
+
+train_scores_mean = train_scores.mean(axis=1)
+valid_scores_mean = valid_scores.mean(axis=1)
+
+train_loss = -train_scores_mean
+valid_loss = -valid_scores_mean
+
+plt.figure(figsize=(8, 5))
+plt.plot(train_sizes, train_loss, "o-", label="Train Loss")
+plt.plot(train_sizes, valid_loss, "o-", label="Validation Loss (CV)")
+plt.xlabel("Training Samples")
+plt.ylabel("Log Loss")
+plt.title("Learning Curve (Log Loss)")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
 # %%
