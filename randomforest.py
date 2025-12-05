@@ -379,3 +379,108 @@ plt.tight_layout()
 plt.show()
 
 # %%
+#test로 평가
+from sklearn.metrics import (
+    accuracy_score, precision_score, 
+    recall_score, classification_report,
+    confusion_matrix
+)
+
+y_test_pred = rf_final.predict(X_test)
+
+print("Test 성능")
+print("F1-score: ", round(f1_score(y_test, y_test_pred), 4))
+print("Accuracy: ", round(accuracy_score(y_test, y_test_pred), 4))
+print("Precision: ", round(precision_score(y_test, y_test_pred), 4))
+print("Recall: ", round(recall_score(y_test, y_test_pred), 4))
+
+print("\nClassification Report")
+print(classification_report(y_test, y_test_pred))
+
+cm = confusion_matrix(y_test, y_test_pred)
+cm_df = pd.DataFrame(
+    cm,
+    index=['Actual_0 (Non-ko)', 'Actual_1 (KO)'],
+    columns=['Predict_0 (Non-ko)', 'Predict_1 (KO)']
+)
+print("Confusion Matrix")
+print(cm_df)
+# %%
+#누적 이득 차트
+from sklearn.metrics import roc_curve, roc_auc_score
+
+def plot_cumulative_gain(y_true, y_prob, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+        
+    data = sorted(zip(y_true, y_prob), key=lambda x: x[1], reverse=True)
+    total = len(y_true)
+    total_positives = sum(y_true)
+    
+    x = np.linspace(0, 1, total)
+    
+    y = np.cumsum([y for y, _ in data]) / total_positives
+    
+    ax.plot(x, y, label='Model', color='blue')
+    ax.plot([0,1], [0,1], '--', color='gray', label='Baseline')
+    ax.set_xlabel('누적 이득 차트(Cumulative Gain)')
+    ax.set_ylabel('전체 데이터 비율')
+    ax.legend()
+    ax.grid(True)
+    return ax
+
+#리프트 차트
+def plot_lift_chart(y_true, y_prob, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+        
+    data = sorted(zip(y_true, y_prob), key=lambda x: x[1], reverse=True)
+    total = len(y_true)
+    total_positives = sum(y_true)
+    
+    deciles = np.linspace(0.1, 1.0, 10)
+    lift_values = []
+    
+    for d in deciles:
+        cutoff = int(total * d)
+        top = data[:cutoff]
+        
+        positives_in_top = sum([y for y, _ in top])
+        lift = (positives_in_top / cutoff) / (total_positives / total)
+        lift_values.append(lift)
+        
+    ax.bar(range(1, 11), lift_values, color='skyblue', edgecolor='black')
+    ax.set_title('리프트 차트')
+    ax.set_xlabel('데시일 (Decile)')
+    ax.set_ylabel('리프트 (Lift)')
+    ax.set_xticks(range(1, 11))
+    ax.set_xticklabels(f'{i*10}%' for i in range(1, 11))
+    ax.grid(True)
+        
+y_test_proba = rf_final.predict_proba(X_test)[:,1]
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+plot_cumulative_gain(y_test, y_test_proba, axes[0])
+plot_lift_chart(y_test, y_test_proba, axes[1])
+
+plt.tight_layout()
+plt.show()        
+# %%
+#ROC
+from sklearn.metrics import roc_curve, roc_auc_score
+
+y_prob = rf_final.predict_proba(X_test)[0:,1]
+
+fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+auc_score = roc_auc_score(y_test, y_prob)
+
+plt.figure(figsize=(6, 4))
+plt.plot(fpr, tpr, label=f'ROC Curve (AUC = {auc_score: .2f})', color='orange')
+plt.plot([0,1], [0,1], 'k--', label='Random Guess')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate(Recall)')
+plt.title('ROC Curve')
+plt.legend(loc='lower right')
+plt.grid(True)
+plt.show()
