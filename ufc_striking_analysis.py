@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy import stats
 
 
@@ -87,6 +88,45 @@ def hedges_g(a: pd.Series, b: pd.Series) -> float:
     # 작은 표본 보정
     J = 1.0 - (3.0 / (4.0 * (na + nb) - 9.0))
     return g * J
+
+
+"""
+각 가설별 그래프 그리기
+"""
+def graph_by_hypotheses(h1_vals, h2_vals, h3_vals, h4_vals):
+    # h1_vals: (ko_body_mean, non_body_mean, p)
+    # h2_vals: (ko_leg_mean, non_leg_mean, p)
+    # h3_vals: (ko_ratio_mean, non_ratio_mean, p)
+    # h4_vals: (win_body_mean, lose_body_mean, p)
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+    width = 0.4
+
+    # H1
+    axs[0, 0].bar([0 - width/2, 0 + width/2], [h1_vals[0], h1_vals[1]],
+                  width=width, tick_label=['KO Winner', 'Non-KO Winner'], color=['tab:blue','tab:orange'])
+    axs[0, 0].set_title(f'H1: Body per-round (p={h1_vals[2]:.4f})')
+    axs[0, 0].set_ylabel('Avg per-round (Body)')
+
+    # H2
+    axs[0, 1].bar([0 - width/2, 0 + width/2], [h2_vals[0], h2_vals[1]],
+                  width=width, tick_label=['KO Winner', 'Non-KO Winner'], color=['tab:blue','tab:orange'])
+    axs[0, 1].set_title(f'H2: Leg per-round (p={h2_vals[2]:.4f})')
+    axs[0, 1].set_ylabel('Avg per-round (Leg)')
+
+    # H3
+    axs[1, 0].bar([0 - width/2, 0 + width/2], [h3_vals[0], h3_vals[1]],
+                  width=width, tick_label=['KO Winner', 'Non-KO Winner'], color=['tab:blue','tab:orange'])
+    axs[1, 0].set_title(f'H3: Body ratio per-round (p={h3_vals[2]:.4f})')
+    axs[1, 0].set_ylabel('Body / (Body + Leg)')
+
+    # H4
+    axs[1, 1].bar([0 - width/2, 0 + width/2], [h4_vals[0], h4_vals[1]],
+                  width=width, tick_label=['Winner', 'Loser'], color=['tab:green','tab:red'])
+    axs[1, 1].set_title(f'H4: KO match Winner vs Loser Body per-round (p={h4_vals[2]:.4f})')
+    axs[1, 1].set_ylabel('Avg per-round (Body)')
+
+    plt.tight_layout()
+    plt.show()
 
 
 def analyze() -> None:
@@ -189,6 +229,13 @@ def analyze() -> None:
     print("\n해석")
     print("- p < 0.05 이면 통계적으로 의미 있는 차이가 있다고 볼 수 있음")
     print("- Hedge's g: 0.2(작은 차이), 0.5(중간), 0.8 이상(큰 차이) 정도로 해석")
+
+    # 그래프 그리기
+    h1_vals = (ko_body.mean(), non_body.mean(), p1)
+    h2_vals = (ko_leg.mean(), non_leg.mean(), p2)
+    h3_vals = (ko_ratio.mean(), non_ratio.mean(), p3)
+    h4_vals = (win_body.mean(), lose_body.mean(), p4)
+    graph_by_hypotheses(h1_vals, h2_vals, h3_vals, h4_vals)
 
 
 if __name__ == "__main__":
