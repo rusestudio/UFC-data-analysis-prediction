@@ -310,31 +310,6 @@ print("각 Fold F1: ", cv_scores)
 print("평균 F1: ", round(cv_scores.mean(), 4))
 print("표준편차: ", round(cv_scores.std(), 4))
 # %%
-rf_final.fit(X_train, y_train)
-train_proba = rf_final.predict_proba(X_train)[:,1]
-
-for th in [0.3, 0.35, 0.4, 0.45, 0.5]:
-    preds = (train_proba >= th).astype(int)
-    print("th: ", th, "f1: ", f1_score(y_train, preds))
-# %%
-#과적합 체크
-y_train_pred = rf_final.predict(X_train)
-train_f1 = f1_score(y_train, y_train_pred)
-
-cv_mean = cv_scores.mean()
-gap = train_f1 - cv_mean
-
-if gap > 0.1:
-    print("과적합 가능성 큼")
-elif gap > 0.05:
-    print("약한 과적합")
-else:
-    print("과적합 심하지 않음")
-    
-print("Train F1: ", round(train_f1, 4))
-print("CV 평균 F1: ", round(cv_mean, 4))
-print("Train - CV 차이: ", round(gap, 4))
-# %%
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import log_loss
 
@@ -423,8 +398,9 @@ def plot_cumulative_gain(y_true, y_prob, ax=None):
     
     ax.plot(x, y, label='Model', color='blue')
     ax.plot([0,1], [0,1], '--', color='gray', label='Baseline')
-    ax.set_xlabel('누적 이득 차트(Cumulative Gain)')
-    ax.set_ylabel('전체 데이터 비율')
+    ax.set_title('누적 이득 차트(Cumulative Gain)')
+    ax.set_xlabel('전체 데이터 비율)')
+    ax.set_ylabel('정답 클래스 누적 비율)')
     ax.legend()
     ax.grid(True)
     return ax
@@ -450,7 +426,7 @@ def plot_lift_chart(y_true, y_prob, ax=None):
         lift_values.append(lift)
         
     ax.bar(range(1, 11), lift_values, color='skyblue', edgecolor='black')
-    ax.set_title('리프트 차트')
+    ax.set_title('리프트 차트(Lift)')
     ax.set_xlabel('데시일 (Decile)')
     ax.set_ylabel('리프트 (Lift)')
     ax.set_xticks(range(1, 11))
