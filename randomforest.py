@@ -1,3 +1,4 @@
+# %%
 import platform
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,10 +12,11 @@ from sklearn.metrics import (accuracy_score, classification_report,
 from sklearn.model_selection import (StratifiedKFold, cross_val_predict,
                                      cross_val_score, learning_curve,
                                      train_test_split)
-
 df = pd.read_csv("ufc_df.csv")
+
 print(df.head(10))
 print(df.isnull().sum())
+
 # fight가 object이지만 필요 없는 변수라 제거할 예정
 print(df.dtypes)
 
@@ -255,6 +257,7 @@ for p in less_high_corr_pairs:
 print("상관 0.9 이상 변수 쌍")
 for i in high_corr_pairs:
     print(i)
+    
 # 최종 변수 상관관계 히트맵
 final_cols = union_cols.copy()
 final_cols.remove("winner_clinch_att")
@@ -269,6 +272,7 @@ plt.xticks(rotation=45, fontsize=10)
 plt.yticks(fontsize=10)
 plt.tight_layout()
 plt.show()
+# %%
 # 최종 변수로 모델(randomforest)
 X = df_200[final_cols]
 y = df_200["ko여부"]
@@ -295,13 +299,14 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
 f1_scorer = make_scorer(f1_score)
 
 cv_scores = cross_val_score(
-    rf_final, X_train_valid, y_train_valid, cv=cv, scoring=f1_scorer
+    rf_final, X_train, y_train, cv=cv, scoring=f1_scorer
 )
 
 print("각 Fold F1: ", cv_scores)
 print("평균 F1: ", round(cv_scores.mean(), 4))
 print("표준편차: ", round(cv_scores.std(), 4))
 
+rf_final.fit(X_train, y_train)
 
 train_proba = rf_final.predict_proba(X_train)
 valid_proba = cross_val_predict(
@@ -331,7 +336,7 @@ valid_scores_mean = valid_scores.mean(axis=1)
 
 train_loss = -train_scores_mean
 valid_loss = -valid_scores_mean
-
+# %%
 plt.figure(figsize=(8, 5))
 plt.plot(train_sizes, train_loss, "o-", label="Train Loss")
 plt.plot(train_sizes, valid_loss, "o-", label="Validation Loss (CV)")
