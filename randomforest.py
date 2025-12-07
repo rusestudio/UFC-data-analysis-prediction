@@ -1,16 +1,22 @@
+import platform
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (accuracy_score, classification_report,
+                             confusion_matrix, f1_score, log_loss, make_scorer,
+                             precision_score, recall_score, roc_auc_score,
+                             roc_curve)
+from sklearn.model_selection import (StratifiedKFold, cross_val_predict,
+                                     cross_val_score, learning_curve,
+                                     train_test_split)
 
 df = pd.read_csv("ufc_df.csv")
 print(df.head(10))
 print(df.isnull().sum())
 # fight가 object이지만 필요 없는 변수라 제거할 예정
 print(df.dtypes)
-
-import platform
-import matplotlib.pyplot as plt
 
 # 한글 적용
 if platform.system() == "Windows":
@@ -31,11 +37,7 @@ plt.xticks(rotation=0)
 plt.show()
 
 df["ko여부"].value_counts()
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split
 
-# ko여부 클래스 불균형 확인
 # 데이터 100개씩
 ko_100 = df[df["ko여부"] == 1].sample(100, random_state=42)
 
@@ -43,10 +45,9 @@ nko_100 = df[df["ko여부"] == 0].sample(100, random_state=42)
 
 df_200 = pd.concat([ko_100, nko_100]).sample(frac=1, random_state=42)
 
+# ko여부 클래스 불균형 확인
 print(df_200["ko여부"].value_counts())
 print(df_200.shape)
-
-from sklearn.model_selection import train_test_split
 
 # train/valid/test
 X = df_200.drop(columns=["ko여부", "fight"])  # 경기 label 필요없을 것 같아 제거
@@ -66,9 +67,6 @@ print("Valid: ", X_valid.shape)
 print("Test: ", X_test.shape)
 
 # RandomForest
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, f1_score
-
 rf = RandomForestClassifier(
     n_estimators=300,
     max_depth=4,
@@ -163,6 +161,7 @@ print("개수: ", len(common_vars))
 
 print("합집합: ", list(union_vars))
 print("개수: ", len(union_vars))
+
 union_vars = list(union_vars)
 union_df = imp_df[imp_df["feature"].isin(union_vars)].sort_values(
     by="importance", ascending=True
@@ -281,8 +280,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 print("Train: ", X_train.shape)
 print("Test: ", X_test.shape)
-from sklearn.metrics import make_scorer
-from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 rf_final = RandomForestClassifier(
     n_estimators=200,
@@ -305,8 +302,6 @@ print("각 Fold F1: ", cv_scores)
 print("평균 F1: ", round(cv_scores.mean(), 4))
 print("표준편차: ", round(cv_scores.std(), 4))
 
-from sklearn.metrics import log_loss
-from sklearn.model_selection import cross_val_predict
 
 train_proba = rf_final.predict_proba(X_train)
 valid_proba = cross_val_predict(
@@ -320,8 +315,6 @@ print("Train loss: ", train_loss)
 print("CV loss: ", valid_loss)
 
 # learning_curve확인
-from sklearn.model_selection import learning_curve
-
 train_sizes, train_scores, valid_scores = learning_curve(
     rf_final,
     X_train,
@@ -351,8 +344,6 @@ plt.tight_layout()
 plt.show()
 
 # test로 평가
-from sklearn.metrics import (accuracy_score, classification_report,
-                             confusion_matrix, precision_score, recall_score)
 
 y_test_pred = rf_final.predict(X_test)
 
@@ -374,9 +365,6 @@ cm_df = pd.DataFrame(
 print("Confusion Matrix")
 print(cm_df)
 # 누적 이득 차트
-from sklearn.metrics import roc_auc_score, roc_curve
-
-
 def plot_cumulative_gain(y_true, y_prob, ax=None):
     if ax is None:
         fig, ax = plt.subplots()
@@ -437,9 +425,8 @@ plot_lift_chart(y_test, y_test_proba, axes[1])
 
 plt.tight_layout()
 plt.show()
-# ROC 곡선
-from sklearn.metrics import roc_auc_score, roc_curve
 
+# ROC 곡선
 y_prob = rf_final.predict_proba(X_test)[0:, 1]
 
 fpr, tpr, thresholds = roc_curve(y_test, y_prob)
