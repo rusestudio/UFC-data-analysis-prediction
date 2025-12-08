@@ -94,36 +94,57 @@ def hedges_g(a: pd.Series, b: pd.Series) -> float:
 각 가설별 그래프 그리기
 """
 def graph_by_hypotheses(h1_vals, h2_vals, h3_vals, h4_vals):
-    # h1_vals: (ko_body_mean, non_body_mean, p)
-    # h2_vals: (ko_leg_mean, non_leg_mean, p)
-    # h3_vals: (ko_ratio_mean, non_ratio_mean, p)
-    # h4_vals: (win_body_mean, lose_body_mean, p)
-    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
-    width = 0.4
+    plt.style.use("seaborn-v0_8")
+    fig, axs = plt.subplots(2, 2, figsize=(12, 9))
+    width = 0.6
+    x = np.array([0, 1])
 
     # H1
-    axs[0, 0].bar([0 - width/2, 0 + width/2], [h1_vals[0], h1_vals[1]],
-                  width=width, tick_label=['KO Winner', 'Non-KO Winner'], color=['tab:blue','tab:orange'])
+    axs[0, 0].bar(x, [h1_vals[0], h1_vals[1]],
+                  width=width,
+                  tick_label=['KO Winner', 'Non-KO Winner'],
+                  color=['tab:blue', 'tab:orange'],
+                  edgecolor='black', alpha=0.85)
     axs[0, 0].set_title(f'H1: Body per-round (p={h1_vals[2]:.4f})')
     axs[0, 0].set_ylabel('Avg per-round (Body)')
+    axs[0, 0].set_xticks(x)
+    axs[0, 0].set_xticklabels(['KO Winner', 'Non-KO Winner'])
 
     # H2
-    axs[0, 1].bar([0 - width/2, 0 + width/2], [h2_vals[0], h2_vals[1]],
-                  width=width, tick_label=['KO Winner', 'Non-KO Winner'], color=['tab:blue','tab:orange'])
+    axs[0, 1].bar(x, [h2_vals[0], h2_vals[1]],
+                  width=width,
+                  tick_label=['KO Winner', 'Non-KO Winner'],
+                  color=['tab:blue', 'tab:orange'],
+                  edgecolor='black', alpha=0.85)
     axs[0, 1].set_title(f'H2: Leg per-round (p={h2_vals[2]:.4f})')
     axs[0, 1].set_ylabel('Avg per-round (Leg)')
+    axs[0, 1].set_xticks(x)
+    axs[0, 1].set_xticklabels(['KO Winner', 'Non-KO Winner'])
 
     # H3
-    axs[1, 0].bar([0 - width/2, 0 + width/2], [h3_vals[0], h3_vals[1]],
-                  width=width, tick_label=['KO Winner', 'Non-KO Winner'], color=['tab:blue','tab:orange'])
+    axs[1, 0].bar(x, [h3_vals[0], h3_vals[1]],
+                  width=width,
+                  tick_label=['KO Winner', 'Non-KO Winner'],
+                  color=['tab:blue', 'tab:orange'],
+                  edgecolor='black', alpha=0.85)
     axs[1, 0].set_title(f'H3: Body ratio per-round (p={h3_vals[2]:.4f})')
     axs[1, 0].set_ylabel('Body / (Body + Leg)')
+    axs[1, 0].set_xticks(x)
+    axs[1, 0].set_xticklabels(['KO Winner', 'Non-KO Winner'])
 
     # H4
-    axs[1, 1].bar([0 - width/2, 0 + width/2], [h4_vals[0], h4_vals[1]],
-                  width=width, tick_label=['Winner', 'Loser'], color=['tab:green','tab:red'])
+    axs[1, 1].bar(x, [h4_vals[0], h4_vals[1]],
+                  width=width,
+                  tick_label=['Winner', 'Loser'],
+                  color=['tab:green', 'tab:red'],
+                  edgecolor='black', alpha=0.85)
     axs[1, 1].set_title(f'H4: KO match Winner vs Loser Body per-round (p={h4_vals[2]:.4f})')
     axs[1, 1].set_ylabel('Avg per-round (Body)')
+    axs[1, 1].set_xticks(x)
+    axs[1, 1].set_xticklabels(['Winner', 'Loser'])
+
+    for ax in axs.flat:
+        ax.grid(True, axis='y', linestyle='--', alpha=0.3)
 
     plt.tight_layout()
     plt.show()

@@ -16,8 +16,8 @@ def extracted_ko_data(ko_data: pd.DataFrame, non_ko_data: pd.DataFrame, ko_round
     ko_loser_leg_avg
     '''
     # 필요 컬럼만 추출 + string 형태의 리스트를 실제 리스트로 변환
-    extracted_ko_prev_data = ko_data[ko_data['round'] < ko_round][['fight', 'body', 'leg']].copy()
-    extracted_non_ko_prev_data = non_ko_data[non_ko_data['round'] < ko_round][['fight', 'body', 'leg']].copy()
+    extracted_ko_prev_data = ko_data[ko_data['current_round'] < ko_round][['fight_id', 'body', 'leg']].copy()
+    extracted_non_ko_prev_data = non_ko_data[non_ko_data['current_round'] < ko_round][['fight_id', 'body', 'leg']].copy()
 
     for column in ['body', 'leg']:
         extracted_ko_prev_data[column] = extracted_ko_prev_data[column].apply(ast.literal_eval)
@@ -28,25 +28,25 @@ def extracted_ko_data(ko_data: pd.DataFrame, non_ko_data: pd.DataFrame, ko_round
         return sum(r[idx_pair][1] for r in rounds_list)
 
     # KO: fight별 누적 (여러 라운드 → 하나로 합침)
-    ko_agg = extracted_ko_prev_data.groupby('fight').agg({'body': list, 'leg': list}).reset_index()
+    ko_agg = extracted_ko_prev_data.groupby('fight_id').agg({'body': list, 'leg': list}).reset_index()
     ko_agg['ko_winner_body_total'] = ko_agg['body'].apply(lambda x: sum_attempts(x, 0))
     ko_agg['ko_winner_leg_total'] = ko_agg['leg'].apply(lambda x: sum_attempts(x, 0))
     ko_agg['ko_loser_body_total'] = ko_agg['body'].apply(lambda x: sum_attempts(x, 1))
     ko_agg['ko_loser_leg_total'] = ko_agg['leg'].apply(lambda x: sum_attempts(x, 1))
 
     # Non-KO: fight별 누적
-    non_agg = extracted_non_ko_prev_data.groupby('fight').agg({'body': list, 'leg': list}).reset_index()
+    non_agg = extracted_non_ko_prev_data.groupby('fight_id').agg({'body': list, 'leg': list}).reset_index()
     non_agg['non_ko_winner_body_total'] = non_agg['body'].apply(lambda x: sum_attempts(x, 0))
     non_agg['non_ko_winner_leg_total'] = non_agg['leg'].apply(lambda x: sum_attempts(x, 0))
     non_agg['non_ko_loser_body_total'] = non_agg['body'].apply(lambda x: sum_attempts(x, 1))
     non_agg['non_ko_loser_leg_total'] = non_agg['leg'].apply(lambda x: sum_attempts(x, 1))
-    non_agg = non_agg.rename(columns={'fight': 'fight'})
+    non_agg = non_agg.rename(columns={'fight_id': 'fight_id'})
 
     # 병합 (KO와 Non-KO는 다른 경기들이므로 outer)
-    ko_final = ko_agg[['fight','ko_winner_body_total','ko_winner_leg_total','ko_loser_body_total','ko_loser_leg_total']]
-    non_final = non_agg[['fight','non_ko_winner_body_total','non_ko_winner_leg_total','non_ko_loser_body_total','non_ko_loser_leg_total']]
-    
-    merged = pd.merge(ko_final, non_final, on='fight', how='outer')
+    ko_final = ko_agg[['fight_id','ko_winner_body_total','ko_winner_leg_total','ko_loser_body_total','ko_loser_leg_total']]
+    non_final = non_agg[['fight_id','non_ko_winner_body_total','non_ko_winner_leg_total','non_ko_loser_body_total','non_ko_loser_leg_total']]
+
+    merged = pd.merge(ko_final, non_final, on='fight_id', how='outer')
     return merged
 
 

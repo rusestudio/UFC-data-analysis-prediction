@@ -1,4 +1,4 @@
-fight,ko_winner_body_total,ko_winner_leg_total,ko_loser_body_total,ko_loser_leg_total,non_ko_winner_body_total,non_ko_winner_leg_total,non_ko_loser_body_total,non_ko_loser_leg_total
+fight_id,ko_winner_body_total,ko_winner_leg_total,ko_loser_body_total,ko_loser_leg_total,non_ko_winner_body_total,non_ko_winner_leg_total,non_ko_loser_body_total,non_ko_loser_leg_total
 fight1,,,,,16.0,5.0,3.0,5.0
 fight10,,,,,16.0,13.0,30.0,3.0
 fight100,21.0,12.0,27.0,11.0,45.0,0.0,33.0,30.0
