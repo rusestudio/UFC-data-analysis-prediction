@@ -1,4 +1,3 @@
-# %%
 import platform
 import matplotlib.pyplot as plt
 import numpy as np
@@ -272,7 +271,7 @@ plt.xticks(rotation=45, fontsize=10)
 plt.yticks(fontsize=10)
 plt.tight_layout()
 plt.show()
-# %%
+
 # 최종 변수로 모델(randomforest)
 X = df_200[final_cols]
 y = df_200["ko여부"]
@@ -336,7 +335,7 @@ valid_scores_mean = valid_scores.mean(axis=1)
 
 train_loss = -train_scores_mean
 valid_loss = -valid_scores_mean
-# %%
+
 plt.figure(figsize=(8, 5))
 plt.plot(train_sizes, train_loss, "o-", label="Train Loss")
 plt.plot(train_sizes, valid_loss, "o-", label="Validation Loss (CV)")
