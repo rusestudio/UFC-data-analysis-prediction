@@ -185,7 +185,7 @@ plt.show()
 plt.figure(figsize=(12, 10))
 
 sns.heatmap(
-    df[union_vars].corr(),
+    df_200[union_vars].corr(),
     annot=True,
     fmt=".2f",
     cmap="coolwarm",
@@ -263,7 +263,7 @@ final_cols.remove("winner_clinch_att")
 print(final_cols)
 
 plt.figure(figsize=(10, 8))
-sns.heatmap(df[final_cols].corr(), annot=True, cmap="coolwarm", vmin=-1, vmax=1)
+sns.heatmap(df_200[final_cols].corr(), annot=True, cmap="coolwarm", vmin=-1, vmax=1)
 
 
 plt.title("final_cols(최종 변수) 상관관계 히트맵", fontsize=14)
