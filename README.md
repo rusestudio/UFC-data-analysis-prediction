@@ -578,11 +578,12 @@ The Random Forest model identified these features as most important for predicti
 ---
 
 ## Contributors
-Team of 4 contributors:
-    rusestudio
-    NAMGUNGEUNHYUNG
-    jongwoogit
-    rladhs123
+
+- [jongwoogit](https://github.com/jongwoogit)
+- [rladhs123](https://github.com/rladhs123)
+- [rusestudio](https://github.com/rusestudio) 
+- [NAMGUNGEUNHYUNG](https://github.com/NAMGUNGEUNHYUNG) 
+
 
 ## 🤝 Contributing
 
