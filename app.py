@@ -137,6 +137,19 @@ with tab3:
     importances = rf_model.feature_importances_
     feat_df = pd.DataFrame({"Feature": final_cols, "Importance": importances}).sort_values("Importance", ascending=False)
     st.bar_chart(feat_df.set_index("Feature"))
+    
+    # Model Performance Images
+    st.subheader("Model Performance Visualizations")
+    st.image("model-prediction/ROC Curve.png", caption="ROC Curve")
+    st.image("model-prediction/heatmap(&).png", caption="Heatmap")
+    st.image("model-prediction/ko여부 분포.png", caption="KO Distribution")
+    st.image("model-prediction/learning_curve.png", caption="Learning Curve")
+    st.image("model-prediction/가설 검정 변수 & 모델 중요도 변수 합집합 변수 중요도.png", caption="Hypothesis & Model Importance Union")
+    st.image("model-prediction/누적 이득 차트 + 리프트 차트.png", caption="Cumulative Gain & Lift Chart")
+    st.image("model-prediction/베이스라인 모델 변수 중요도.png", caption="Baseline Model Feature Importance")
+    st.image("model-prediction/변수 중요도(0.025 이상).png", caption="Top Features (Importance ≥ 0.025)")
+    st.image("model-prediction/이상치 점검.png", caption="Outlier Check")
+    st.image("model-prediction/최종 변수 상관관계.png", caption="Final Feature Correlation")
 
 with tab4:
     st.header("Make a Prediction")
