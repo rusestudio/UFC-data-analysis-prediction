@@ -55,64 +55,50 @@ def train_model():
 rf_model = train_model()
 
 # Tabs
-tab1, tab2, tab3 = st.tabs(["📊 Data Overview", "🎯 Model Performance", "🔮 Prediction"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Data Overview", "📈 Analysis", "🎯 Model Performance", "🔮 Prediction"])
 
 with tab1:
     st.header("Data Overview")
-    st.write("Sample of the dataset:")
-    st.dataframe(df.head(10))
     
-    st.subheader("KO Distribution")
-    fig, ax = plt.subplots()
-    df["ko여부"].value_counts().plot(kind="bar", ax=ax)
-    ax.set_title("KO Distribution")
-    ax.set_xlabel("KO 여부")
-    ax.set_ylabel("Count")
-    st.pyplot(fig)
+    # Load and display previews of processed datasets
+    st.subheader("KO Data Preview")
+    ko_data = pd.read_csv("processed-dataset/ko_data.csv")
+    st.dataframe(ko_data.head(10))
+    
+    st.subheader("KO Final Preview")
+    ko_final = pd.read_csv("processed-dataset/ko_final.csv")
+    st.dataframe(ko_final.head(10))
+    
+    st.subheader("Non-KO Data Preview")
+    nko_data = pd.read_csv("processed-dataset/nko_data.csv")
+    st.dataframe(nko_data.head(10))
+    
+    st.subheader("Non-KO Final Preview")
+    nko_final = pd.read_csv("processed-dataset/nko_final.csv")
+    st.dataframe(nko_final.head(10))
 
 with tab2:
-    st.header("Model Performance")
+    st.header("Analysis Results")
     
-    # Test predictions
-    y_test_pred = rf_model.predict(X_test)
-    y_test_proba = rf_model.predict_proba(X_test)[:, 1]
-    
-    col1, col2 = st.columns(2)
-    
+    # Images from data-analyze/on/image
+    st.subheader("Data Analysis Images")
+    col1, col2, col3 = st.columns(3)
     with col1:
-        st.subheader("Classification Report")
-        report = classification_report(y_test, y_test_pred, output_dict=True)
-        st.dataframe(pd.DataFrame(report).transpose())
-    
+        st.image("data-analyze/on/image/graph_by_h.png", caption="Graph by H")
     with col2:
-        st.subheader("Confusion Matrix")
-        cm = confusion_matrix(y_test, y_test_pred)
-        cm_df = pd.DataFrame(
-            cm,
-            index=["Actual Non-KO", "Actual KO"],
-            columns=["Predicted Non-KO", "Predicted KO"],
-        )
-        st.dataframe(cm_df)
+        st.image("data-analyze/on/image/grahp_h1.png", caption="Graph H1")
+    with col3:
+        st.image("data-analyze/on/image/bar_graph.png", caption="Bar Graph")
     
-    # ROC Curve
-    st.subheader("ROC Curve")
-    fpr, tpr, _ = roc_curve(y_test, y_test_proba)
-    auc_score = roc_auc_score(y_test, y_test_proba)
-    
-    fig, ax = plt.subplots()
-    ax.plot(fpr, tpr, label=f"AUC = {auc_score:.2f}")
-    ax.plot([0, 1], [0, 1], 'k--')
-    ax.set_xlabel("False Positive Rate")
-    ax.set_ylabel("True Positive Rate")
-    ax.set_title("ROC Curve")
-    ax.legend()
-    st.pyplot(fig)
-    
-    # Feature Importance
-    st.subheader("Feature Importance")
-    importances = rf_model.feature_importances_
-    feat_df = pd.DataFrame({"Feature": final_cols, "Importance": importances}).sort_values("Importance", ascending=False)
-    st.bar_chart(feat_df.set_index("Feature"))
+    # Images from visualization
+    st.subheader("Visualization Images")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("visualization/ko_heatmap_hedges.png", caption="KO Heatmap Hedges")
+        st.image("visualization/body.png", caption="Body Strikes")
+    with col2:
+        st.image("visualization/leg.png", caption="Leg Strikes")
+        st.image("visualization/body_leg.png", caption="Body vs Leg")
 
 with tab3:
     st.header("Make a Prediction")
