@@ -92,15 +92,53 @@ with tab2:
     
     # Images from visualization
     st.subheader("Visualization Images")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.image("visualization/ko_heatmap_hedges.png", caption="KO Heatmap Hedges")
-        st.image("visualization/body.png", caption="Body Strikes")
-    with col2:
-        st.image("visualization/leg.png", caption="Leg Strikes")
-        st.image("visualization/body_leg.png", caption="Body vs Leg")
+    st.image("visualization/ko_heatmap_hedges.png", caption="KO Heatmap Hedges")
 
 with tab3:
+    st.header("Model Performance")
+    
+    # Test predictions
+    y_test_pred = rf_model.predict(X_test)
+    y_test_proba = rf_model.predict_proba(X_test)[:, 1]
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Classification Report")
+        report = classification_report(y_test, y_test_pred, output_dict=True)
+        st.dataframe(pd.DataFrame(report).transpose())
+    
+    with col2:
+        st.subheader("Confusion Matrix")
+        cm = confusion_matrix(y_test, y_test_pred)
+        cm_df = pd.DataFrame(
+            cm,
+            index=["Actual Non-KO", "Actual KO"],
+            columns=["Predicted Non-KO", "Predicted KO"],
+        )
+        st.dataframe(cm_df)
+    
+    # ROC Curve
+    st.subheader("ROC Curve")
+    fpr, tpr, _ = roc_curve(y_test, y_test_proba)
+    auc_score = roc_auc_score(y_test, y_test_proba)
+    
+    fig, ax = plt.subplots()
+    ax.plot(fpr, tpr, label=f"AUC = {auc_score:.2f}")
+    ax.plot([0, 1], [0, 1], 'k--')
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_title("ROC Curve")
+    ax.legend()
+    st.pyplot(fig)
+    
+    # Feature Importance
+    st.subheader("Feature Importance")
+    importances = rf_model.feature_importances_
+    feat_df = pd.DataFrame({"Feature": final_cols, "Importance": importances}).sort_values("Importance", ascending=False)
+    st.bar_chart(feat_df.set_index("Feature"))
+
+with tab4:
     st.header("Make a Prediction")
     st.write("Enter fight statistics to predict if it will end in KO/TKO.")
     
@@ -126,6 +164,8 @@ with tab3:
                 st.success(f"Predicted: KO/TKO (Probability: {proba[1]:.2f})")
             else:
                 st.info(f"Predicted: Non-KO (Probability: {proba[0]:.2f})")
+
+with tab4:
 
 # Footer
 st.markdown("---")
