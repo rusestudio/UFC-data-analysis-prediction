@@ -165,8 +165,6 @@ with tab4:
             else:
                 st.info(f"Predicted: Non-KO (Probability: {proba[0]:.2f})")
 
-with tab4:
-
 # Footer
 st.markdown("---")
 st.markdown("Built with Streamlit | Data from UFCStats.com")
